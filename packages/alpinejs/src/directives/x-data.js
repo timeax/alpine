@@ -1,43 +1,71 @@
-import { directive, prefix } from '../directives'
-import { initInterceptors } from '../interceptor'
-import { injectDataProviders } from '../datas'
-import { addRootSelector } from '../lifecycle'
-import { shouldSkipRegisteringDataDuringClone } from '../clone'
-import { addScopeToNode } from '../scope'
-import { injectMagics, magic } from '../magics'
-import { reactive } from '../reactivity'
-import { evaluate } from '../evaluator'
+import { directive, prefix } from "../directives";
+import { initInterceptors } from "../interceptor";
+import { injectDataProviders } from "../datas";
+import { addRootSelector } from "../lifecycle";
+import { shouldSkipRegisteringDataDuringClone } from "../clone";
+import { addScopeToNode } from "../scope";
+import { injectMagics, magic } from "../magics";
+import { reactive } from "../reactivity";
+import { evaluate } from "../evaluator";
 
-addRootSelector(() => `[${prefix('data')}]`)
+addRootSelector(() => `[${prefix("data")}]`);
 
-directive('data', ((el, { expression }, { cleanup }) => {
-    if (shouldSkipRegisteringDataDuringClone(el)) return
+/**
+ * @type {{
+ *  [x: string]: {
+ *  data: any,
+ * elements: HTMLElement[]
+ * }
+ * }}
+ */
+const states = {};
 
-    expression = expression === '' ? '{}' : expression
+function stateUtil(id, data, element, reactive) {
+    if (!states[id]) {
+        states[id] = {
+            data: reactive(data),
+            elements: []
+        };
+    }
+    states[id].elements.push(element);
+    return states[id].data;
+}
 
-    let magicContext = {}
-    injectMagics(magicContext, el)
+directive("data", (el, { expression, value: id }, { cleanup }) => {
+    if (shouldSkipRegisteringDataDuringClone(el)) return;
 
-    let dataProviderContext = {}
-    injectDataProviders(dataProviderContext, magicContext)
+    expression = expression === "" ? "{}" : expression;
 
-    let data = evaluate(el, expression, { scope: dataProviderContext })
+    let magicContext = {};
+    injectMagics(magicContext, el);
 
-    if (data === undefined || data === true) data = {}
+    let dataProviderContext = {};
+    injectDataProviders(dataProviderContext, magicContext);
 
-    injectMagics(data, el)
+    let data = evaluate(el, expression, { scope: dataProviderContext });
 
-    let reactiveData = reactive(data)
+    if (data === undefined || data === true) data = {};
 
-    initInterceptors(reactiveData)
+    injectMagics(data, el);
+    //-----------
+    let reactiveData = id
+        ? stateUtil(id, data, el, reactive)
+        : reactive(data);
 
-    let undo = addScopeToNode(el, reactiveData)
+    initInterceptors(reactiveData);
 
-    reactiveData['init'] && evaluate(el, reactiveData['init'])
+    let undo = addScopeToNode(el, reactiveData);
+
+    reactiveData["init"] && evaluate(el, reactiveData["init"]);
 
     cleanup(() => {
-        reactiveData['destroy'] && evaluate(el, reactiveData['destroy'])
-
-        undo()
-    })
-}))
+        reactiveData["destroy"] && evaluate(el, reactiveData["destroy"]);
+        if (id) {
+            const state = states[id];
+            state.elements = state.elements.filter(item => item !== el);
+            //----
+            if (state.elements.length === 0) delete states[id];
+        }
+        undo();
+    });
+});
