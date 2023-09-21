@@ -80,6 +80,7 @@ directive("fragment", (/**@type {HTMLTemplateElement} */el,  /**@type {{expressi
         reactiveData["destroy"] && evaluate(el, reactiveData["destroy"]);
         // //-------
         undos.forEach(item => item());
+        elements.forEach(item => item.remove());
     });
 });
 

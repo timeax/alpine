@@ -1,6 +1,6 @@
 import { magic } from '../magics'
 
-magic('watchStates', (el) => () => function (n) {
+magic('watchStates', () => {
     /**
      * @param {any[]} deps
      * @param {Function} event
@@ -9,4 +9,4 @@ magic('watchStates', (el) => () => function (n) {
         event.call(this);
         deps.forEach(item => this.$watch(item, (i) => event.call(this, item, i)));
     }
-})
+});

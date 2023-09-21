@@ -62,6 +62,8 @@ import './magics/index'
  */
 import './directives/index'
 
+import './dom'
+
 /**
  * _______________________________________________________
  * The Alpine Global

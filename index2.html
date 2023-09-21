@@ -13,10 +13,12 @@
 
         <button @click="count++">+</button>
     </div>
+    <template x-inner="'<strong>this is a test</strong>'"></template>
 
     <template x-fragment>
         <div x-data="{other: 'string'}">
             <span>this is a text <i x-text="other"></i></span>
+            <i x-text="console.log($find)"></i>
         </div>
     </template>
 </html>

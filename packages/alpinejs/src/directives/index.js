@@ -18,6 +18,7 @@ import './x-for'
 import './x-ref'
 import './x-if'
 import './x-id'
+import './x-inner'
 import './x-on'
 
 // Register warnings for people using plugin syntaxes and not loading the plugin itself:
