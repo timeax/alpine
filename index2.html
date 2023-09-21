@@ -1,5 +1,5 @@
-<html>
-    <script src="./packages/navigate/dist/cdn.js" defer></script>
+<div class="names">
+    <html>
     <script src="./packages/alpinejs/dist/cdn.js" defer></script>
 
     <hr>
@@ -13,4 +13,11 @@
 
         <button @click="count++">+</button>
     </div>
+
+    <template x-fragment>
+        <div x-data="{other: 'string'}">
+            <span>this is a text <i x-text="other"></i></span>
+        </div>
+    </template>
 </html>
+</div>
